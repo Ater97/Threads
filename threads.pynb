@@ -60,7 +60,7 @@ model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss=keras.losses.categorical_crossentropy,
              optimizer=keras.optimizers.Adadelta(), metrics=['accuracy'])
 
-#Train model and test
+#import Threads libraries
 import threading
 from time import sleep
 from multiprocessing.dummy import Pool as ThreadPool
@@ -68,7 +68,7 @@ from multiprocessing import Process, Manager, Value
 import multiprocessing
 from threading import Thread, Lock  # <----
 
-
+#Train model and test
 def train(hist, pNumber):
     print("Thread number" + str(pNumber))
     hist = model.fit(x_train, y_train,
@@ -76,16 +76,20 @@ def train(hist, pNumber):
                 epochs=1,
                 verbose=1,
                 validation_data=(x_test, y_test))
+firstHist = model.fit(x_train, y_train,
+                batch_size=batch_size,
+                epochs=1,
+                verbose=1,
+                validation_data=(x_test, y_test))
 
-
-
-#epochs
 if __name__ == "__main__":
     manager = Manager()
-    hist = manager.Value('i', 0)
+    #hist = manager.Value('i',0) 
+    hist = manager.register('hist',firstHist)
 
 Procs =[]
 print("Thread started")
+#epochs
 for i in range(0,3):
   p = Process(target=train, args=(hist,i))
   Procs.append(p)
