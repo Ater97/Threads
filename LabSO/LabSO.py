@@ -48,7 +48,7 @@ print("Threads started")
 
 for pic in Photos:
     print("starting new thread")
-    thread = threading.Thread(target = upload, args = (pic,))
+    thread = threadin   g.Thread(target = upload, args = (pic,))
     Threads.append(thread)
     thread.start()
 sleep(2)
