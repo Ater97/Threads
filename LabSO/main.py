@@ -18,18 +18,6 @@ if not credz or credz.invalid:
 
 DRIVE = build('drive', 'v3', http=credz.authorize(Http()))
 
-FILES = (
-    ('photo.jpg', None),
-    ('photo.jpg', 'application/vnd.google-apps.document')
-)
-
-for filename, mimeType in FILES:
-    metadata = {'name': filename}
-    if mimeType:
-        metadata['mimeType'] = mimeType
-    res = DRIVE.files().create(body=metadata, media_body=filename).execute()
-    if res:
-        print('Uploaded "%s" (%s)' % (filename, res['mimeType']))
 
 if res:
     MIMETYPE = 'application/pdf'

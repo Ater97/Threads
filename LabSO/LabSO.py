@@ -3,6 +3,7 @@ from time import sleep
 import tkinter as tk
 from tkinter import filedialog
 import os, sys
+import multiprocessing.dummy as mp 
 #import pyAesCrypt
 import os
 from apiclient.discovery import build
@@ -44,8 +45,9 @@ DRIVE = build('drive', 'v3', http=credz.authorize(Http()))
 Photos = list(getFolderFiles())
 Threads = []
 print("Threads started")
+
 for pic in Photos:
-    print("thread")
+    print("starting new thread")
     thread = threading.Thread(target = upload, args = (pic,))
     Threads.append(thread)
     thread.start()
@@ -54,3 +56,13 @@ for thr in Threads:
     thr.join()
 sleep(2)
 print("Joins finished")
+
+'''
+count = len(Photos)
+print("list count" + str(count))
+
+if __name__=="__main__":
+    p=mp.Pool(count)
+    p.map(upload,Photos)
+    p.close()
+    p.join()'''
