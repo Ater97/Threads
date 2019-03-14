@@ -58,7 +58,7 @@ model.add(Dense(num_classes, activation='softmax'))
 
 # Define compile to minimize categoricl loss, use ada delta optimized
 model.compile(loss=keras.losses.categorical_crossentropy,
-             optimizer=keras.optimizers.Adadelta(), metrics=['accuracy'])
+            optimizer=keras.optimizers.Adadelta(), metrics=['accuracy'])
 
 #import Threads libraries
 import threading
@@ -66,55 +66,56 @@ from time import sleep
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import Process, Manager, Value
 import multiprocessing
-from threading import Thread, Lock  # <----
-
+from threading import Thread, Lock  
+from multiprocessing.managers import BaseManager
+from keras.layers import Concatenate, concatenate
+from keras.models import Model
 #Train model and test
-def train(hist, pNumber):
-    print("Thread number" + str(pNumber))
-    hist = model.fit(x_train, y_train,
-                batch_size=batch_size,
-                epochs=1,
-                verbose=1,
-                validation_data=(x_test, y_test))
-firstHist = model.fit(x_train, y_train,
-                batch_size=batch_size,
-                epochs=1,
-                verbose=1,
-                validation_data=(x_test, y_test))
+def train(hist):
+  #print("Thread number " + str(pNumber))
+  hist = model.fit(x_train, y_train,
+              batch_size=batch_size,
+              epochs=1,
+              verbose=1,
+              validation_data=(x_test, y_test))
+  return hist  
 
-if __name__ == "__main__":
-    manager = Manager()
-    #hist = manager.Value('i',0) 
-    hist = manager.register('hist',firstHist)
+def mergeHist(histA,histB):
+  new_model = Sequential()
+  mergedOutput = Concatenate()([histA.output, histB.output])
+  finalOutput = new_model(mergedOutput)    
+  fullModel = Model([histA.input,histB.input],finalOutput)
+  return fullModel  
+
 
 Procs =[]
+hist = Sequential()
 print("Thread started")
 #epochs
-for i in range(0,3):
-  p = Process(target=train, args=(hist,i))
+for i in range(0,4):
+  p = Process(target=train, args=(hist,))
   Procs.append(p)
   p.start()
-  sleep(2)
+  sleep(5)
   
 print("Join")
 for t in Procs:
   t.join()
-  
+  sleep(5)
   print("Thread joined")
 print("Threads done")
-
-
 sleep(5)
+
+
 # Evaluate the model with the test data to get the scores on "real" data.
 score=model.evaluate(x_test,y_test,verbose=0)
 print('Test loss:', score[0])
 print('Tets accuracy',score[1])
-
-
-#  Plot data to see relationships in training and validation data
+'''
+# Plot data to see relationships in training and validation data
 import numpy as np
 import matplotlib.pyplot as plt
-#epoch_list = list(range(1, len(hist.history['acc']) + 1)) #values for x axis
-#plt.plot(epoch_list, hist.history['acc'], epoch_list, hist.history['val_acc'])
-#plt.legend(('Training Accuracy', 'Validation Accuracy'))
-#plt.show()
+epoch_list = list(range(1, len(hist.history['acc']) + 1)) #values for x axis
+plt.plot(epoch_list, hist.history['acc'], epoch_list, hist.history['val_acc'])
+plt.legend(('Training Accuracy', 'Validation Accuracy'))
+plt.show()'''
