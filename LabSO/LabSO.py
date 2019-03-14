@@ -28,8 +28,8 @@ def upload(path):
         res = DRIVE.files().create(body=metadata, media_body=filename).execute()
         if res:
             print('Uploaded "%s" (%s)' % (filename, res['mimeType']))
-#Autenticar
 
+#Autenticar
 SCOPES = 'https://www.googleapis.com/auth/drive.file'
 CLIENT_SECRET = 'client_secret.json'
 
@@ -41,16 +41,16 @@ if not credz or credz.invalid:
 
 DRIVE = build('drive', 'v3', http=credz.authorize(Http()))
 
-print(datatype(getFolderFiles()))
 Photos = list(getFolderFiles())
 Threads = []
-
+print("Threads started")
 for pic in Photos:
-    thread = Thread(target = upload, args = (pic,))
-    Threads.add(thread)
+    print("thread")
+    thread = threading.Thread(target = upload, args = (pic,))
+    Threads.append(thread)
     thread.start()
-sleep(5)
+sleep(2)
 for thr in Threads:
     thr.join()
-
-sleep(5)
+sleep(2)
+print("Joins finished")
